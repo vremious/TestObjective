@@ -5,18 +5,38 @@ from io import BytesIO
 from celery import shared_task
 from django.core.mail import EmailMessage
 from TestProject1 import settings
-from .models import RetailObject
+from retail.models import RetailObject
 import qrcode
 
+# Функция qrcode_test тестирует создания qr кода с интересующей информацией
+def qrcode_test():
+    retail_object = RetailObject.objects.get(id=5)
+    qr_data = f"Name: {retail_object.retail_name}\nEmail: {retail_object.retail_email}\n" \
+              f"Country: {retail_object.retail_country}\nCity: {retail_object.retail_city}\n" \
+              f"Street: {retail_object.retail_street}, Building: {retail_object.retail_building}"
 
+    qr = qrcode.QRCode(version=1, box_size=10, border=1)
+    qr.add_data(qr_data)
+    qr.make(fit=True)
+    img = qr.make_image(fill='black', back_color='white')
+    buffer = BytesIO()
+    img.save(buffer)
+    img.save('image.png')
+
+
+qrcode_test()
+
+
+# Реализация задания 2.2 (асинхронная очистка данных объектов через action)
 @shared_task
 def clear_retail_debt_async(ids):
     RetailObject.objects.filter(id__in=ids).update(retail_debt=0)
 
 
+# Реализация задания 2.3 (генерация qr кода и отправка его по почте через api)
 @shared_task
 def send_email_with_qr(retail_object_id, user_email):
-    from .models import RetailObject
+
     retail_object = RetailObject.objects.get(id=retail_object_id)
     qr_data = f"Name: {retail_object.retail_name}\nEmail: {retail_object.retail_email}\n" \
               f"Country: {retail_object.retail_country}\nCity: {retail_object.retail_city}\n" \
@@ -25,11 +45,10 @@ def send_email_with_qr(retail_object_id, user_email):
     qr = qrcode.QRCode(version=1, box_size=10, border=5)
     qr.add_data(qr_data)
     qr.make(fit=True)
-
     img = qr.make_image(fill='black', back_color='white')
-
     buffer = BytesIO()
-    img.save(buffer, format='PNG')
+    img.save(buffer)
+    img.save('image.png')
     email = EmailMessage(
         subject='Ваша контактная информация в QR-коде',
         body='Пожалуйста, найдите ваш QR-код с контактными данными.',

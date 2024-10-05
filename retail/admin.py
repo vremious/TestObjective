@@ -10,7 +10,7 @@ class WorkerInline(admin.TabularInline):
 
 
 class RetailObjectAdmin(admin.ModelAdmin):
-    list_display = ['retail_type', 'retail_name', 'retail_debt', 'supplier_link']
+    list_display = ['retail_type', 'retail_name', 'retail_debt', 'supplier_link', 'copy_email_button']
     list_filter = ['retail_country']
     actions = ['clear_debts']
     inlines = [WorkerInline]
@@ -22,7 +22,7 @@ class RetailObjectAdmin(admin.ModelAdmin):
         else:
             return None
 
-    supplier_link.short_description = 'Supplier'
+    supplier_link.short_description = 'Поставщик'
 
     def clear_debts(self, request, queryset):
         if queryset.count() > 20:
@@ -34,9 +34,20 @@ class RetailObjectAdmin(admin.ModelAdmin):
 
     clear_debts.short_description = "Обнулить долговую задолженность продуктов"
 
+    def copy_email_button(self, obj):
+        return format_html(
+            '<button class="copy-email-button" data-email="{}">Копировать email</button>',
+            obj.retail_email
+        )
+
+    copy_email_button.short_description = 'Действие'
+
+    class Media:
+        js = ('js/copy_email.js',)
 
 # admin.site.register(Country)
 # admin.site.register(ProductCompany)
 admin.site.register(Product)
 admin.site.register(RetailObject, RetailObjectAdmin)
+admin.site.register(UserToRetailObject)
 # admin.site.register(RetailWorkers)

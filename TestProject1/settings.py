@@ -50,7 +50,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'retail',
-    'drf_spectacular'
+    'drf_spectacular',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
+
+
 ]
 
 MIDDLEWARE = [
@@ -85,6 +90,8 @@ TEMPLATES = [
 REST_FRAMEWORK = {
     # YOUR SETTINGS
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework_simplejwt.authentication.JWTAuthentication',
+                                       'rest_framework.authentication.BasicAuthentication')
 }
 
 WSGI_APPLICATION = 'TestProject1.wsgi.application'
@@ -159,8 +166,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
-
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # Укажите путь к вашей папке статических файлов
+]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
