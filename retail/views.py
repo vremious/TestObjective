@@ -1,18 +1,20 @@
 import django.contrib.auth.models
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, permissions, generics, status
-from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from .filters import ModelFilter
 from .models import RetailObject, Product, UserToRetailObject
 from .serializers import RetailObjectSerializer, ProductSerializer, GenerateQrRequestSerializer
-from django_filters.rest_framework import DjangoFilterBackend
 from .tasks import send_email_with_qr
 
 
 class RetailObjectViewSet(viewsets.ModelViewSet):
+    """
+    Эндпоинт для объектов ретейла
+    """
+
     queryset = RetailObject.objects.all()
     renderer_classes = [JSONRenderer]
     serializer_class = RetailObjectSerializer
@@ -30,6 +32,9 @@ class RetailObjectViewSet(viewsets.ModelViewSet):
 
 
 class ProductViewSet(viewsets.ModelViewSet):
+    """
+    Эндпоинт для продукции
+    """
     queryset = Product.objects.all()
     renderer_classes = [JSONRenderer]
     serializer_class = ProductSerializer
@@ -40,6 +45,9 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 
 class SendQrCodeAPIView(generics.CreateAPIView):
+    """
+    Эндпоинт для отправки QR на почту
+    """
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = GenerateQrRequestSerializer
 

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+
 from celery.schedules import crontab
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
@@ -52,7 +53,6 @@ INSTALLED_APPS = [
     'retail',
     'drf_spectacular',
     'rest_framework',
-    'rest_framework.authtoken',
     'rest_framework_simplejwt',
 
 

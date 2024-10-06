@@ -1,30 +1,33 @@
 import decimal
-import random
 import logging
+import random
 from io import BytesIO
+
+import qrcode
 from celery import shared_task
 from django.core.mail import EmailMessage
+
 from TestProject1 import settings
 from retail.models import RetailObject
-import qrcode
+
 
 # Функция qrcode_test тестирует создания qr кода с интересующей информацией
-def qrcode_test():
-    retail_object = RetailObject.objects.get(id=5)
-    qr_data = f"Name: {retail_object.retail_name}\nEmail: {retail_object.retail_email}\n" \
-              f"Country: {retail_object.retail_country}\nCity: {retail_object.retail_city}\n" \
-              f"Street: {retail_object.retail_street}, Building: {retail_object.retail_building}"
-
-    qr = qrcode.QRCode(version=1, box_size=10, border=1)
-    qr.add_data(qr_data)
-    qr.make(fit=True)
-    img = qr.make_image(fill='black', back_color='white')
-    buffer = BytesIO()
-    img.save(buffer)
-    img.save('image.png')
-
-
-qrcode_test()
+# def qrcode_test():
+#     retail_object = RetailObject.objects.get(id=5)
+#     qr_data = f"Name: {retail_object.retail_name}\nEmail: {retail_object.retail_email}\n" \
+#               f"Country: {retail_object.retail_country}\nCity: {retail_object.retail_city}\n" \
+#               f"Street: {retail_object.retail_street}, Building: {retail_object.retail_building}"
+#
+#     qr = qrcode.QRCode(version=1, box_size=10, border=1)
+#     qr.add_data(qr_data)
+#     qr.make(fit=True)
+#     img = qr.make_image(fill='black', back_color='white')
+#     buffer = BytesIO()
+#     img.save(buffer)
+#     img.save('image.png')
+#
+#
+# qrcode_test()
 
 
 # Реализация задания 2.2 (асинхронная очистка данных объектов через action)
@@ -61,6 +64,7 @@ def send_email_with_qr(retail_object_id, user_email):
     email.send()
 
 
+# Реализация задания 2.2 с увеличением долга каждые 3 часа
 @shared_task
 def increase_debt():
     suppliers = RetailObject.objects.filter(retail_supplier__isnull=False)
@@ -72,6 +76,7 @@ def increase_debt():
                      f' до: {supplier.retail_debt}.')
 
 
+# Реализация задания 2.2 с уменьшением долга долга
 @shared_task
 def decrease_debt():
     suppliers = RetailObject.objects.filter(retail_supplier__isnull=False)

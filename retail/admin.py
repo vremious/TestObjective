@@ -1,8 +1,9 @@
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
-from .tasks import clear_retail_debt_async
+
 from retail.models import *
+from .tasks import clear_retail_debt_async
 
 
 class WorkerInline(admin.TabularInline):
@@ -15,6 +16,7 @@ class RetailObjectAdmin(admin.ModelAdmin):
     actions = ['clear_debts']
     inlines = [WorkerInline]
 
+    # Реализация пункта 1.3 (ссылка по кнопке на объект поставщика)
     def supplier_link(self, obj):
         if obj.retail_supplier:
             url = reverse('admin:retail_retailobject_change', args=[obj.retail_supplier.id])
@@ -24,6 +26,7 @@ class RetailObjectAdmin(admin.ModelAdmin):
 
     supplier_link.short_description = 'Поставщик'
 
+    # Реализация пункта 1.3 и 2.2  (отчистка задолженности перед поставщиком)
     def clear_debts(self, request, queryset):
         if queryset.count() > 20:
             clear_retail_debt_async.delay(list(queryset.values_list('id', flat=True)))
@@ -34,6 +37,7 @@ class RetailObjectAdmin(admin.ModelAdmin):
 
     clear_debts.short_description = "Обнулить долговую задолженность продуктов"
 
+    # Реализация задания 2.6 (кнопка скапоировать контакт с использованием JS)
     def copy_email_button(self, obj):
         return format_html(
             '<button class="copy-email-button" data-email="{}">Копировать email</button>',
@@ -45,9 +49,7 @@ class RetailObjectAdmin(admin.ModelAdmin):
     class Media:
         js = ('js/copy_email.js',)
 
-# admin.site.register(Country)
-# admin.site.register(ProductCompany)
+
 admin.site.register(Product)
 admin.site.register(RetailObject, RetailObjectAdmin)
 admin.site.register(UserToRetailObject)
-# admin.site.register(RetailWorkers)

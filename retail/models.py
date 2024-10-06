@@ -1,10 +1,8 @@
 import datetime
-import uuid
 
-from django.conf import settings
+from django.contrib.auth.models import User, AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.contrib.auth.models import User, AbstractUser
 from rest_framework.authtoken.models import Token as AuthToken
 
 
@@ -71,7 +69,7 @@ class RetailObject(models.Model):
     retail_building = models.CharField(verbose_name='Номер здания', max_length=5)
     retail_products = models.ManyToManyField(Product, verbose_name='Товары', )
     retail_debt = models.DecimalField(verbose_name='Задолженность перед поставщиком',
-                                      max_digits=100, decimal_places=2, default=0.00)
+                                      max_digits=100, decimal_places=2, default=0)
     retail_supplier = models.ForeignKey('self', verbose_name='Поставщик', null=True, blank=True,
                                         on_delete=models.SET_NULL,
                                         related_name='Поставщики')
@@ -82,6 +80,8 @@ class RetailObject(models.Model):
         super().clean()
         if len(self.retail_name) > 50:
             raise ValidationError("Название сети не может превышать 50 символов.")
+        elif self.retail_debt < 0:
+            raise ValidationError('Задолженность не может быть отрицательной')
 
     # Реализация иерархии постащик-реселлер
     def save(self, *args, **kwargs):
